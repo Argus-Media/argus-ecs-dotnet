@@ -72,7 +72,7 @@ namespace Elastic.CommonSchema.Serialization
 				_output = output;
 			}
 
-			public void Serialize(EcsDocument ecsEvent)
+			public void Serialize(Base ecsEvent)
 			{
 				if (_writer != null)
 					ecsEvent.Serialize(_writer);

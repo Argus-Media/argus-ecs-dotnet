@@ -12,7 +12,7 @@ namespace Elastic.CommonSchema.Tests.Repro
 		{
 			// Metadata properties with null values should be serialised
 			var uniqueName = Guid.NewGuid().ToString();
-			var root = new EcsDocument
+			var root = new Base
 			{
 				Metadata = new Dictionary<string, object>
 				{

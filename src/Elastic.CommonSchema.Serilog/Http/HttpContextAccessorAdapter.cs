@@ -42,7 +42,10 @@ namespace Elastic.CommonSchema.Serilog
 				{
 					Name = userAgent,
 					Original = userAgent,
-					DeviceName = clientInfo.Device.ToString(),
+					Device = new UserAgentDevice
+					{
+						Name = clientInfo.Device.ToString()
+					},
 					Os = new Os
 					{
 						Family = clientInfo.OS.Family,
@@ -54,43 +57,41 @@ namespace Elastic.CommonSchema.Serilog
 			}
 		}
 
-		public Http Http
+		public Http Http => _httpContextAccessor.HttpContext == null ? null : new Http
 		{
-			get
+			Request = new HttpRequest
 			{
-				if (_httpContextAccessor.HttpContext == null)
-					return null;
-				else
-				{
-					var http = new Http
-					{
-						RequestMethod = _httpContextAccessor.HttpContext.Request.Method,
-						RequestBytes = _httpContextAccessor.HttpContext.Request.ContentLength,
-						RequestReferrer = _httpContextAccessor.HttpContext.Request.Headers["Referer"],
-						ResponseStatusCode = _httpContextAccessor.HttpContext.Response.StatusCode,
-					};
-					SetResponseBody(http);
-					SetRequestBody(http);
-					return http;
-				}
+				Method = _httpContextAccessor.HttpContext.Request.Method,
+				Bytes = _httpContextAccessor.HttpContext.Request.ContentLength,
+				Body = GetRequestBody(),
+				Referrer = _httpContextAccessor.HttpContext.Request.Headers["Referer"]
+			},
+			Response = new HttpResponse
+			{
+				Bytes = _httpContextAccessor.HttpContext.Response.ContentLength,
+				StatusCode = _httpContextAccessor.HttpContext.Response.StatusCode,
+				Body = GetResponseBody()
 			}
-		}
+		};
 
-		private void SetResponseBody(Http http)
-		{
+		private ResponseBody GetResponseBody() => null;
 		// TODO!
-		// http.ResponseBodyBytes = 0, //response?.OutputStream.Length ?? 0,
-		// http.ResponseBodyContent  = _httpContextAccessor.HttpContext.Response.Body
-		}
+		// return new ResponseBody
+		// {
+		//    Bytes = 0, //response?.OutputStream.Length ?? 0,
+		//    Content = _httpContextAccessor.HttpContext.Response.Body
+		// };
 
-		private void SetRequestBody(Http http)
+		private RequestBody GetRequestBody()
 		{
 			if (!_httpContextAccessor.HttpContext.Request.ContentLength.HasValue)
-				return;
+				return null;
 
-			http.RequestBodyBytes = _httpContextAccessor.HttpContext.Request.ContentLength;
-			//TODO!
-			// http.RequestBodyContent = _httpContextAccessor.HttpContext.Request.Body
+			return new RequestBody
+			{
+				Bytes = _httpContextAccessor.HttpContext.Request.ContentLength,
+				// Content = _httpContextAccessor.HttpContext.Request.Body
+			};
 		}
 
 		public Url Url

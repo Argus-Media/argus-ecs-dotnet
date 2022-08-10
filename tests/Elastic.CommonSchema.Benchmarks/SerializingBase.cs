@@ -10,13 +10,13 @@ namespace Elastic.CommonSchema.Benchmarks
 		[Benchmark]
 		public string Empty()
 		{
-			var ecs = new EcsDocument();
+			var ecs = new Base();
 			return ecs.Serialize();
 		}
 		[Benchmark]
 		public string Minimal()
 		{
-			var ecs = new EcsDocument
+			var ecs = new Base
 			{
 				Timestamp =  DateTimeOffset.UtcNow,
 				Log = new Log
@@ -30,21 +30,25 @@ namespace Elastic.CommonSchema.Benchmarks
 		[Benchmark]
 		public string Complex()
 		{
-			var ecs = new EcsDocument
+			var ecs = new Base
 			{
 				Timestamp =  DateTimeOffset.UtcNow,
 				Log = new Log
 				{
 					Level = "Debug", Logger = "Logger",
-					OriginFunction = "Complext",
-					OriginFileLine = 12,
-					OriginFileName = "file.cs",
+					Origin = new LogOrigin
+					{
+						File = new OriginFile { Line = 12, Name = "file.cs"}, Function = "Complex"
+					},
+					Original = "new log line",
 					Syslog = new LogSyslog {
-						FacilityCode = 12,
-						FacilityName = "syslog",
-						Priority = 12,
-						SeverityCode = 12,
-						SeverityName = "asd",
+						Facility = new SyslogFacility
+						{
+							Code = 12, Name = "syslog"
+						}, Priority = 12, Severity = new SyslogSeverity()
+						{
+							Code = 12, Name =  "asd"
+						},
 					}
 				},
 				Message = "hello world!",
@@ -57,7 +61,7 @@ namespace Elastic.CommonSchema.Benchmarks
 			return ecs.Serialize();
 		}
 
-		public static readonly EcsDocument FullInstance = new AutoFaker<EcsDocument>().Generate();
+		public static readonly Base FullInstance = new AutoFaker<Base>().Generate();
 
 		[Benchmark]
 		public string Full() => FullInstance.Serialize();

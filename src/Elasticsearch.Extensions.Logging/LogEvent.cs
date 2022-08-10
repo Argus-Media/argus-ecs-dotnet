@@ -10,7 +10,7 @@ using Elastic.CommonSchema.Serialization;
 
 namespace Elasticsearch.Extensions.Logging
 {
-	public class LogEvent : EcsDocument
+	public class LogEvent : Base
 	{
 		// Custom fields; use capitalisation as per ECS
 		private const string MessageTemplatePropertyName = nameof(MessageTemplate);
